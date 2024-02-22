@@ -38,13 +38,9 @@ async def mute_user(user, channel):
     await user.add_roles(mute_role)
     print(f'{user.display_name} đã bị mute.')
 
-    # Gửi thông báo vào kênh chat
+
     await channel.send(f'{user.mention} đã bị làm giả lập người câm trong 30p')
-
-    # Đợi 30 phút
     await asyncio.sleep(MUTE_TIME)
-
-    # Hủy role mute sau 30 phút
     await user.remove_roles(mute_role)
     print(f'{user.display_name} đã được hủy mute.')
 
