@@ -7,7 +7,7 @@ intents.message_content = True
 client = commands.Bot(command_prefix='!', intents=intents)
 
 TOKEN = '' #Tự ném token vào
-MUTE_ROLE_NAME = 'Tù Nhân'  # Tên của role mute
+MUTE_ROLE_NAME = 'Muted'  # Tên của role mute
 MUTE_TIME = 1800  # Thời gian mute trong giây (30 phút)
 
 @client.event
