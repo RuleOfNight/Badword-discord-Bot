@@ -6,7 +6,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 client = commands.Bot(command_prefix='!', intents=intents)
 
-TOKEN = 'MTIwOTQ5OTg3MjU2MzA0MDI2Ng.GqJgMO.afgUWCLRE-QG7MUUEfoV5Nm3CTiWFc3g6kWdqA' #Tự ném token vào
+TOKEN = '' #Tự ném token vào
 MUTE_ROLE_NAME = 'Tù Nhân'  # Tên của role mute
 MUTE_TIME = 1800  # Thời gian mute theo giây
 
