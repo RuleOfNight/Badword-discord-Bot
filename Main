@@ -1,18 +1,42 @@
+
+# $ git add .
+# $ git commit -am "make it better"
+# $ git push heroku master
+# git add requirements.txt
+# git commit -m "Fix requirements.txt"
+# git push heroku master
+
 import discord
 from discord.ext import commands
 import asyncio
+import os
 
 intents = discord.Intents.default()
 intents.message_content = True
+intents.members = True
 client = commands.Bot(command_prefix='!', intents=intents)
 
-TOKEN = '' #Tự ném token vào
-MUTE_ROLE_NAME = 'Muted'  # Tên của role mute
-MUTE_TIME = 1800  # Thời gian mute trong giây (30 phút)
+TOKEN = '' #Tự lấy token ở dev portal
+MUTE_ROLE_NAME = 'Tù Nhân' #Tên role mute
+MUTE_TIME = 18000 #Time mute tính theo giây
+
+# Danh sách từ cấm
+bad_words = ['chị 7', 'chj 7', 'cị 7', 'cj 7', 'Chị 7', 'Chj 7', 'Cị 7', 'Cj 7', 'chị bải', 'chị Bải', 'Chị bải', 'chj Bải', 'Chj bải', 'Chj Bải', 'cị Bải', 'Cị bải', 'Cị Bải', 'cj Bải', 'Cj bải', 'Cj Bải', 'chị 7', 'chj 7', 'cị 7', 'cj 7', 'Chị 7', 'Chj 7', 'Cị 7', 'Cj 7', 'chị bảy', 'chị Bảy', 'Chị bảy', 'chj Bảy', 'Chj bảy', 'Chj Bảy', 'cị Bảy', 'Cị bảy', 'Cị Bảy', 'cj Bảy', 'Cj bảy', 'Cj Bảy', 'chi7', 'Chi7', 'chị7', 'Chị7', 'Ch! Bải', '7 onee san', '7 onee chan', 'chụy pảy','👩‍🦰 7️⃣', 'c  h ị 7', 'Ch ị 7', 'Mommy 7', 'ㄥ ịɥɔ', 'Sister Seven', 'cô   7', 'cô 7', 'Bà 7', 'chị ⑦', 'Chụy Bẩy', 'sis 7', 'chị  thất', 'chị thất', 'Nee-san 7', 'Chỵ 7', 'Chuỵ 7', 'Chy 7', 'chy 7', 'chỵ 7', '715 onee san', 'Chyii 7', 'bảy onee-chan', 'Chijjjjj 7', 'Chijjjj 7', 'Chijjj 7', 'Chijj 7', 'Chij 7', 'Thất tỉ', 'chị 77', 'chị boải', 'Thất tỉ', 'Chị thất', 'chị sen vừn', 'chị se vừn', 'chị se vằn', '7 chị', 'sist 7', 'Thím ba?y', 'Chuy. Bảy', 'Thất chị?', 'Bé bảj', 'Chảy bị', '🚺7️⃣', 'Ch! 7', 'Cô-7', 'Chị°7', '7 oneesan', '7 oneechan', 'One san 7', 'one san 7', 'C h ị.    B. Ả y', 'sister 7', '7 sister', '7 oneesan', 'em gái 7', 'em 7', 'gái 7', 'Chị♥7', ' сhị 7', 'Chị • 7', 'Chij• bảy', 'Chị•🕖', '🕖', 'chị VII', 'sister thất', 'Thất sư tỷ', 'Chị bay?', 'Thất tỷ', 'thất tỷ', 'Thất muội', 'thất muội', '7 nee san', '7 onee sama', 'bải onee chan', '7 chan', 'Ane 7', 'СHỊ ВẢY', 'oneeee_chan 7', 'chị  7','e6s5 nói gì cũng đúng','E6s5 nói gì cũng đúng','E6S5 nói gì cũng đúng','e6s5 lói gì cũng đúng','e6s5 nói gì cũng đún','e6s5 lói gì cũng đún','e6 nói gì cũng đúng','E6 nói gì cũng đúng','Người giàu nói gì cũng đúng','c6r5 nói gì cũng đúng','C6r5 nói gì cũng đúng','C6R5 nói gì cũng đúng','bố hèn','bố P hèn','bố p hèn','pố hèn','Pố hèn','Pố p hèn','Pố P hèn','pố P hèn','bố Phong hèn','bố phong hèn','bp hèn','Bp hèn','BP hèn','Anh phong hèn','Anh P hèn','anh phong hèn','Anh Phong hèn','anh p hèn','anh P hèn','anh phong hèn','anh Phong hèn','bố hèn','Bố hèn','ông P hèn','ông p hèn','Ông p hèn','Ông P hèn','og p hèn','Og p hèn','og P hèn','Og P hèn','bố ph hèn','Bố ph hèn','bố phong H hèn','bố Phong H hèn','bố Phong h hèn','Bố phong h hèn','a Phong hè n','Tỷ seven']
 
 @client.event
 async def on_ready():
-    print(f'{client.user} giáng lâm')
+    print(f'{client.user} đã sẵn sàng')
+
+@client.command(name='add', help='Chỉ admin có thể sử dụng.')
+@commands.has_permissions(administrator=True)
+async def add_bad_word(ctx, *, word):
+    bad_words.append(word.lower())  #add
+    await ctx.send(f'Đã thêm từ cấm: `{word}` vào danh sách.')
+
+# Cập nhật hàm on_message
+async def check_bad_words(message):
+    if any(word in message.content.lower() for word in bad_words):
+        await mute_user(message.author, message.channel)
 
 @client.event
 async def on_message(message):
@@ -20,11 +44,13 @@ async def on_message(message):
         return
 
     if message.channel.name == '🍀〢chat-chung':
-        bad_words = ['chị 7', 'chj 7', 'cị 7', 'cj 7', 'Chị 7', 'Chj 7', 'Cị 7', 'Cj 7', 'chị bải', 'chị Bải', 'Chị bải', 'chj Bải', 'Chj bải', 'Chj Bải', 'cị Bải', 'Cị bải', 'Cị Bải', 'cj Bải', 'Cj bải', 'Cj Bải', 'chị 7', 'chj 7', 'cị 7', 'cj 7', 'Chị 7', 'Chj 7', 'Cị 7', 'Cj 7', 'chị bảy', 'chị Bảy', 'Chị bảy', 'chj Bảy', 'Chj bảy', 'Chj Bảy', 'cị Bảy', 'Cị bảy', 'Cị Bảy', 'cj Bảy', 'Cj bảy', 'Cj Bảy', 'chi7', 'Chi7', 'chị7', 'Chị7', 'Ch! Bải', '7 onee san', '7 onee chan']
         if any(word in message.content.lower() for word in bad_words):
             await mute_user(message.author, message.channel)
 
+    await check_bad_words(message)
     await client.process_commands(message)
+
+WHITELISTED_ROLES = ['Demon Slime', 'Ngoài vòng pháp luật', 'Mod', 'sơn màu tăng luck', '👑Friendly Artist👑', 'Whitelist', '✨']
 
 async def mute_user(user, channel):
     guild = user.guild
@@ -38,10 +64,18 @@ async def mute_user(user, channel):
     await user.add_roles(mute_role)
     print(f'{user.display_name} đã bị mute.')
 
+    mute_message = await channel.send(f'{user.mention} đã bị làm giả lập người câm trong 30p')
 
-    await channel.send(f'{user.mention} đã bị làm giả lập người câm trong 30p')
+    if any(role.name in WHITELISTED_ROLES for role in user.roles):
+        await user.remove_roles(mute_role)
+        await mute_message.delete()
+        await channel.send(f'{user.mention} không bị chọn làm mục tiêu.')
+        print(f'{user.display_name} được gỡ bỏ mute do có trong danh sách whitelist.')
+        return
+
     await asyncio.sleep(MUTE_TIME)
-    await user.remove_roles(mute_role)
-    print(f'{user.display_name} đã được hủy mute.')
+    if mute_role in user.roles:
+        await user.remove_roles(mute_role)
+        print(f'{user.display_name} đã được hủy mute.')
 
 client.run(TOKEN)
